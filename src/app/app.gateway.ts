@@ -7,23 +7,21 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { AppService } from '../app.service';
+import { MessageService } from '../Message/message.service';
 import { Prisma } from '@prisma/client';
+import { Message } from 'src/Message/schemas/message.schema';
 
 @WebSocketGateway()
 export class AppGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private appService: AppService) {}
+  constructor(private messageService: MessageService) {}
 
   @WebSocketServer() server: Server;
 
   @SubscribeMessage('sendMessage')
-  async handleSendMessage(
-    client: Socket,
-    payload: Prisma.ChatCreateInput,
-  ): Promise<void> {
-    await this.appService.createMessage(payload);
+  async handleSendMessage(client: Socket, payload: Message): Promise<void> {
+    await this.messageService.createMessage(payload);
     this.server.emit('recMessage', payload);
   }
 
